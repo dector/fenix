@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment.findNavController
@@ -157,7 +158,8 @@ class BrowserFragment : Fragment(), BackHandler, CoroutineScope {
                 ToolbarViewModel::class.java
             ) {
                 ToolbarViewModel(
-                    SearchState("", getSessionById()?.searchTerms ?: "", isEditing = false)
+                    SavedStateHandle()
+//                    SearchState("", getSessionById()?.searchTerms ?: "", isEditing = false)
                 )
             }
         )

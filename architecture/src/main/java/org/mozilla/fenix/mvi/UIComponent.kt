@@ -56,7 +56,7 @@ abstract class UIComponentViewModelBase<S : ViewState, C : Change>(
 ) : ViewModel(), UIComponentViewModel<S, C> {
 
     final override val changes: Observer<C>
-    private var _state: BehaviorSubject<S> = BehaviorSubject.createDefault(initialState)
+    protected var _state: BehaviorSubject<S> = BehaviorSubject.createDefault(initialState)
     override val state: Observable<S>
         get() = _state
 

@@ -18,6 +18,8 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
 import androidx.transition.TransitionInflater
 import kotlinx.android.synthetic.main.fragment_search.*
@@ -42,6 +44,8 @@ import org.mozilla.fenix.components.toolbar.ToolbarViewModel
 import org.mozilla.fenix.ext.getSpannable
 import org.mozilla.fenix.ext.requireComponents
 import org.mozilla.fenix.mvi.ActionBusFactory
+import org.mozilla.fenix.mvi.UIComponentViewModel
+import org.mozilla.fenix.mvi.UIComponentViewModelProvider
 import org.mozilla.fenix.mvi.getAutoDisposeObservable
 import org.mozilla.fenix.mvi.getManagedEmitter
 import org.mozilla.fenix.search.awesomebar.AwesomeBarAction
@@ -88,12 +92,13 @@ class SearchFragment : Fragment(), BackHandler {
             isPrivate,
             true,
             view.search_engine_icon,
-            FenixViewModelProvider.create(
+            FenixViewModelProvider.create2(
                 this,
                 ToolbarViewModel::class.java
-            ) {
+            )
+            /*{
                 ToolbarViewModel(SearchState(url, session?.searchTerms ?: "", isEditing = true))
-            }
+            }*/
         )
 
         awesomeBarComponent = AwesomeBarComponent(

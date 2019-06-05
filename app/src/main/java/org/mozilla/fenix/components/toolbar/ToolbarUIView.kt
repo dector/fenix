@@ -5,6 +5,7 @@
 package org.mozilla.fenix.components.toolbar
 
 import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -125,6 +126,7 @@ class ToolbarUIView(
     }
 
     override fun updateView() = Consumer<SearchState> {
+        Log.w("+++", "Updating view with state: $it")
         var newState = it
         if (shouldUpdateEngineIcon(newState)) {
             updateEngineIcon(newState)

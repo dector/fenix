@@ -4,9 +4,12 @@
 
 package org.mozilla.fenix.components.toolbar
 
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.SavedStateHandle
+import io.reactivex.Observable
 import kotlinx.android.synthetic.main.component_search.*
 import mozilla.components.browser.search.SearchEngine
 import mozilla.components.browser.toolbar.BrowserToolbar
@@ -94,8 +97,19 @@ sealed class SearchChange : Change {
     data class SearchShortcutEngineSelected(val engine: SearchEngine) : SearchChange()
 }
 
-class ToolbarViewModel(initialState: SearchState) :
-    UIComponentViewModelBase<SearchState, SearchChange>(initialState, reducer) {
+class ToolbarViewModel(private val savedState: SavedStateHandle) :
+    UIComponentViewModelBase<SearchState, SearchChange>(savedState.asInitialState(), reducer) {
+
+    override val state: Observable<SearchState>
+        get() = super.state.doOnEach {
+            val it = it.value!!
+            savedState["query"] = it.query
+            savedState["searchTerm"] = it.searchTerm
+            savedState["isEditing"] = it.isEditing
+            if (it.engine != null) savedState["engine"] = it.engine
+            savedState["focused"] = it.focused
+            savedState["isQueryUpdated"] = it.isQueryUpdated
+        }
 
     companion object {
         val reducer: Reducer<SearchState, SearchChange> = { state, change ->
@@ -107,5 +121,14 @@ class ToolbarViewModel(initialState: SearchState) :
                     state.copy(engine = change.engine)
             }
         }
+
+        private fun SavedStateHandle.asInitialState(): SearchState = SearchState(
+            query = get("query") ?: "",
+            searchTerm = get("searchTerm") ?: "",
+            isEditing = get("isEditing") ?: true,
+            engine = get("engine"),
+            focused = get("focused") ?: false,
+            isQueryUpdated = get("isQueryUpdated") ?: false
+        )
     }
 }
