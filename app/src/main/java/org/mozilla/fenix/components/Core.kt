@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
 import mozilla.components.browser.icons.BrowserIcons
+import mozilla.components.browser.session.Session
 import mozilla.components.browser.session.SessionManager
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.storage.sync.PlacesBookmarksStorage
@@ -128,6 +129,8 @@ class Core(private val context: Context) {
         }
     }
 
+    val wrappedSessionManager: WrappedSessionManager by lazy { RealWrappedSessionManager(sessionManager) }
+
     /**
      * Icons component for loading, caching and processing website icons.
      */
@@ -184,4 +187,14 @@ class Core(private val context: Context) {
             else -> PreferredColorScheme.Light
         }
     }
+}
+
+interface WrappedSessionManager {
+
+    val selectedSession: Session?
+}
+
+class RealWrappedSessionManager(private val delegate: SessionManager) : WrappedSessionManager {
+
+    override val selectedSession get() = delegate.selectedSession
 }

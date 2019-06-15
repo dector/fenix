@@ -37,7 +37,7 @@ class CrashReporterFragment : Fragment() {
 
         requireContext().components.analytics.metrics.track(Event.CrashReporterOpened)
 
-        val selectedSession = requireComponents.core.sessionManager.selectedSession
+        val selectedSession = requireComponents.core.wrappedSessionManager.selectedSession
 
         restore_tab_button.setOnClickListener {
             selectedSession?.let { session -> closeFragment(true, session, crash) }
@@ -50,26 +50,27 @@ class CrashReporterFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        (activity as AppCompatActivity).supportActionBar?.hide()
+        (activity as? AppCompatActivity)?.supportActionBar?.hide()
     }
 
     private fun closeFragment(shouldRestore: Boolean, session: Session, crash: Crash) {
         submitReportIfNecessary(crash)
 
         if (shouldRestore) {
-            requireComponents.useCases.sessionUseCases.crashRecovery.invoke()
+            requireComponents.useCases.wrappedSessionUseCases.crashRecovery.invoke()
             Navigation.findNavController(view!!).popBackStack()
         } else {
-            requireComponents.useCases.tabsUseCases.removeTab.invoke(session)
-            requireComponents.useCases.sessionUseCases.crashRecovery.invoke()
+            requireComponents.useCases.wrappedTabsUseCases.removeTab.invoke(session)
+            requireComponents.useCases.wrappedSessionUseCases.crashRecovery.invoke()
             navigateHome(view!!)
         }
     }
 
     private fun submitReportIfNecessary(crash: Crash) {
         var didSubmitCrashReport = false
+        // FIXME non-mockable dependency :(
         if (Settings.getInstance(context!!).isCrashReportingEnabled) {
-            requireComponents.analytics.crashReporter.submitReport(crash)
+            requireComponents.analytics.wrappedCrashReporter.submitReport(crash)
             didSubmitCrashReport = true
         }
         requireContext().components.analytics.metrics.track(Event.CrashReporterClosed(didSubmitCrashReport))

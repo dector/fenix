@@ -8,6 +8,7 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import mozilla.components.lib.crash.Crash
 import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.lib.crash.service.CrashReporterService
 import mozilla.components.lib.crash.service.MozillaSocorroService
@@ -74,6 +75,8 @@ class Analytics(
         )
     }
 
+    val wrappedCrashReporter: WrappedCrashReporter by lazy { RealWrappedCrashReporter(crashReporter) }
+
     val metrics: MetricController by lazy {
         MetricController.create(
             listOf(
@@ -84,4 +87,14 @@ class Analytics(
             isTelemetryEnabled = { Settings.getInstance(context).isTelemetryEnabled }
         )
     }
+}
+
+interface WrappedCrashReporter {
+
+    fun submitReport(crash: Crash)
+}
+
+class RealWrappedCrashReporter(private val delegate: CrashReporter) : WrappedCrashReporter {
+
+    override fun submitReport(crash: Crash) = delegate.submitReport(crash)
 }
