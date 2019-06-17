@@ -4,6 +4,8 @@
 
 package org.mozilla.fenix.components.toolbar
 
+import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
@@ -67,6 +69,43 @@ class ToolbarComponent(
             ThemeManager.resolveAttribute(R.attr.secondaryText, container.context)
         )
     }
+
+    fun saveState(savedState: Bundle) {
+        val state = viewModelProvider.fetchViewModel()
+            .state
+            .blockingLatest()
+            .firstOrNull()
+            ?: return
+
+        Log.w("+++", "Saving state: $state")
+
+        savedState.apply {
+            putString("query", state.query)
+            putString("searchTerm", state.searchTerm)
+            putBoolean("isEditing", state.isEditing)
+            putBoolean("focused", state.focused)
+            putBoolean("isQueryUpdated", state.isQueryUpdated)
+
+            if (state.engine != null) {
+                TODO()
+            }
+        }
+    }
+
+    companion object {
+
+        fun restoreState(savedState: Bundle?): SearchState? {
+            savedState ?: return null
+
+            return SearchState(
+                query = savedState.getString("query") ?: "",
+                searchTerm = savedState.getString("searchTerm") ?: "",
+                isEditing = savedState.getBoolean("isEditing", false),
+                focused = savedState.getBoolean("focused", false),
+                isQueryUpdated = savedState.getBoolean("isQueryUpdated", false)
+            )
+        }
+    }
 }
 
 data class SearchState(
@@ -92,6 +131,7 @@ sealed class SearchChange : Change {
     object ToolbarRequestedFocus : SearchChange()
     object ToolbarClearedFocus : SearchChange()
     data class SearchShortcutEngineSelected(val engine: SearchEngine) : SearchChange()
+//    data class StateRestored(val state: SearchState) : SearchChange()
 }
 
 class ToolbarViewModel(initialState: SearchState) :
@@ -105,6 +145,7 @@ class ToolbarViewModel(initialState: SearchState) :
                 is SearchChange.ToolbarRequestedFocus -> state.copy(focused = true)
                 is SearchChange.SearchShortcutEngineSelected ->
                     state.copy(engine = change.engine)
+//                is SearchChange.StateRestored -> change.state
             }
         }
     }

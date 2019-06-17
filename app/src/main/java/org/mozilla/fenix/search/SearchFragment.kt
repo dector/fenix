@@ -11,6 +11,7 @@ import android.graphics.Typeface.BOLD
 import android.graphics.Typeface.ITALIC
 import android.os.Bundle
 import android.text.style.StyleSpan
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -93,7 +94,10 @@ class SearchFragment : Fragment(), BackHandler {
                 this,
                 ToolbarViewModel::class.java
             ) {
-                ToolbarViewModel(SearchState(url, session?.searchTerms ?: "", isEditing = true))
+                val restoredState = ToolbarComponent.restoreState(savedInstanceState?.getBundle("toolbarState"))
+                Log.w("+++", "Restored state: $restoredState")
+
+                ToolbarViewModel(restoredState ?: SearchState(url, session?.searchTerms ?: "", isEditing = true))
             }
         ).also {
             // Remove background from toolbar view since it conflicts with the search UI.
@@ -112,6 +116,11 @@ class SearchFragment : Fragment(), BackHandler {
         )
         ActionBusFactory.get(this).logMergedObservables()
         return view
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        toolbarComponent.saveState(Bundle().also { outState.putBundle("toolbarState", it) })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

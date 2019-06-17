@@ -26,7 +26,7 @@ interface UIComponentViewModelProvider<S : ViewState, C : Change> {
 abstract class UIComponent<S : ViewState, A : Action, C : Change>(
     protected val actionEmitter: Observer<A>,
     protected val changesObservable: Observable<C>,
-    private val viewModelProvider: UIComponentViewModelProvider<S, C>
+    protected val viewModelProvider: UIComponentViewModelProvider<S, C>
 ) {
     open val uiView: UIView<S, A, C> by lazy { initView() }
 
